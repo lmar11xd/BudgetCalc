@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,7 +29,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -38,6 +43,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lmar.budgetcalc.R
+import com.lmar.budgetcalc.Utils
 import com.lmar.budgetcalc.data.UserDataUiEvents
 
 @Composable
@@ -132,6 +138,7 @@ fun AnimalCard(
     selected: Boolean,
     animalSelected: (animalName: String) -> Unit
 ) {
+    val localFocusManager = LocalFocusManager.current
     Card(
         modifier = Modifier
             .padding(24.dp)
@@ -143,7 +150,7 @@ fun AnimalCard(
                 .fillMaxSize()
                 .border(
                     width = 2.dp,
-                    color = if(selected) Color.Green else Color.Transparent,
+                    color = if (selected) Color.Green else Color.Transparent,
                     shape = RoundedCornerShape(8.dp)
                 )
         ) {
@@ -153,8 +160,9 @@ fun AnimalCard(
                     .wrapContentWidth()
                     .wrapContentHeight()
                     .clickable {
-                        val animalName = if(image == R.drawable.cat) "Cat" else "Dog"
+                        val animalName = if (image == R.drawable.cat) "Cat" else "Dog"
                         animalSelected(animalName)
+                        localFocusManager.clearFocus()
                     },
                 painter = painterResource(id = image),
                 contentDescription = "Animal Image"
@@ -167,4 +175,87 @@ fun AnimalCard(
 @Composable
 fun AnimalCardPreview() {
     AnimalCard(R.drawable.cat, false, {})
+}
+
+@Composable
+fun ButtonComponent(
+    goToDetailsScreen: () -> Unit
+) {
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = {
+            goToDetailsScreen()
+        }
+    ) {
+        TextComponent(
+            textValue = "Go to Details Screen",
+            textSize = 18.sp,
+            colorValue = Color.White
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ButtonComponentPreview() {
+    ButtonComponent {
+
+    }
+}
+
+@Composable
+fun TextWidthShadow(value: String) {
+    val shadowOffset = Offset(x = 1f, y = 2f)
+    Text(
+        text = value,
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Light,
+        style = TextStyle(
+            shadow = Shadow(Utils.generateRandomColor(), shadowOffset, 2f)
+        )
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TextWidthShadowPreview() {
+    TextWidthShadow(value = "Prueba ")
+}
+
+@Composable
+fun FactComposable(value: String) {
+    Card(
+        modifier = Modifier
+            .padding(32.dp)
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp, 24.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_quote),
+                contentDescription = "Quote image",
+                modifier = Modifier.rotate(180f)
+            )
+
+            Spacer(modifier = Modifier.size(24.dp))
+
+            TextWidthShadow(value = value)
+
+            Spacer(modifier = Modifier.size(24.dp))
+
+            Image(
+                painter = painterResource(id = R.drawable.ic_quote),
+                contentDescription = "Quote image",
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun FactComposablePreview() {
+    FactComposable("Abceddd allalal")
 }

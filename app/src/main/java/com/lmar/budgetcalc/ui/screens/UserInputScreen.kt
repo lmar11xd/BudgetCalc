@@ -16,13 +16,17 @@ import androidx.compose.ui.unit.sp
 import com.lmar.budgetcalc.R
 import com.lmar.budgetcalc.data.UserDataUiEvents
 import com.lmar.budgetcalc.ui.AnimalCard
+import com.lmar.budgetcalc.ui.ButtonComponent
 import com.lmar.budgetcalc.ui.TextComponent
 import com.lmar.budgetcalc.ui.TextFieldComponent
 import com.lmar.budgetcalc.ui.TopBar
 import com.lmar.budgetcalc.ui.UserInputViewModel
 
 @Composable
-fun UserInputScreen(userInputViewModel: UserInputViewModel) {
+fun UserInputScreen(
+    userInputViewModel: UserInputViewModel,
+    showWelcomeScreen: (valuesPair: Pair<String, String>) -> Unit
+) {
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -85,6 +89,24 @@ fun UserInputScreen(userInputViewModel: UserInputViewModel) {
                     selected = userInputViewModel.uiState.value.animalSelected == "Dog"
                 )
             }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            if (userInputViewModel.isValidState()) {
+                ButtonComponent(
+                    goToDetailsScreen = {
+                        println("============Coming Here!")
+                        println("============${userInputViewModel.uiState.value.nameEntered} and ${userInputViewModel.uiState.value.animalSelected}")
+                        showWelcomeScreen(
+                            Pair(
+                                userInputViewModel.uiState.value.nameEntered,
+                                userInputViewModel.uiState.value.animalSelected
+                            )
+                        )
+                    }
+                )
+            }
+
         }
     }
 }
@@ -92,5 +114,7 @@ fun UserInputScreen(userInputViewModel: UserInputViewModel) {
 @Preview
 @Composable
 fun UserInputScreenPreview() {
-    UserInputScreen(UserInputViewModel())
+    UserInputScreen(UserInputViewModel()) {
+
+    }
 }
