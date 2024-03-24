@@ -1,4 +1,4 @@
-package com.lmar.budgetcalc
+package com.lmar.budgetcalc.core.util
 
 import androidx.compose.ui.graphics.Color
 import kotlin.random.Random

@@ -3,8 +3,8 @@ package com.lmar.budgetcalc.ui
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.lmar.budgetcalc.data.UserDataUiEvents
-import com.lmar.budgetcalc.data.UserInputScreenState
+import com.lmar.budgetcalc.feature.data.UserDataUiEvents
+import com.lmar.budgetcalc.feature.data.UserInputScreenState
 
 class UserInputViewModel: ViewModel() {
 

@@ -1,4 +1,4 @@
-package com.lmar.budgetcalc.ui
+package com.lmar.budgetcalc.core.presentation
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -43,8 +43,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lmar.budgetcalc.R
-import com.lmar.budgetcalc.Utils
-import com.lmar.budgetcalc.data.UserDataUiEvents
+import com.lmar.budgetcalc.core.util.Utils
 
 @Composable
 fun TopBar(value: String) {

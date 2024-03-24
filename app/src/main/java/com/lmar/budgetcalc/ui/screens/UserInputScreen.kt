@@ -14,12 +14,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lmar.budgetcalc.R
-import com.lmar.budgetcalc.data.UserDataUiEvents
-import com.lmar.budgetcalc.ui.AnimalCard
-import com.lmar.budgetcalc.ui.ButtonComponent
-import com.lmar.budgetcalc.ui.TextComponent
-import com.lmar.budgetcalc.ui.TextFieldComponent
-import com.lmar.budgetcalc.ui.TopBar
+import com.lmar.budgetcalc.feature.data.UserDataUiEvents
+import com.lmar.budgetcalc.core.presentation.AnimalCard
+import com.lmar.budgetcalc.core.presentation.ButtonComponent
+import com.lmar.budgetcalc.core.presentation.TextComponent
+import com.lmar.budgetcalc.core.presentation.TextFieldComponent
+import com.lmar.budgetcalc.core.presentation.TopBar
 import com.lmar.budgetcalc.ui.UserInputViewModel
 
 @Composable

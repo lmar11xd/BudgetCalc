@@ -3,24 +3,20 @@ package com.lmar.budgetcalc.ui.screens
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
-import com.lmar.budgetcalc.ui.FactComposable
+import com.lmar.budgetcalc.core.presentation.FactComposable
 import com.lmar.budgetcalc.ui.FactsViewModel
-import com.lmar.budgetcalc.ui.TextComponent
-import com.lmar.budgetcalc.ui.TextWidthShadow
-import com.lmar.budgetcalc.ui.TopBar
+import com.lmar.budgetcalc.core.presentation.TextComponent
+import com.lmar.budgetcalc.core.presentation.TextWidthShadow
+import com.lmar.budgetcalc.core.presentation.TopBar
 
 @Composable
 fun WelcomeScreen(username: String?, animalSelected: String?) {
@@ -35,7 +31,7 @@ fun WelcomeScreen(username: String?, animalSelected: String?) {
                 .fillMaxSize()
                 .padding(18.dp)
         ) {
-            TopBar(value = "Welcome ${username} \uD83D\uDE0D")
+            TopBar(value = "Welcome $username \uD83D\uDE0D")
 
             TextComponent(textValue = "Thank you! for sharing your data", textSize = 24.sp)
 
