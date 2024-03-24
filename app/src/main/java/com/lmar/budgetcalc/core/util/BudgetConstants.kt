@@ -10,10 +10,15 @@ object BudgetListStrings {
     const val CANT_GET_BUDGETS = "Error: no se pudo obtener los presupuestos"
 }
 
+object BudgetNewUpdateStrings {
+    const val SAVE_BUDGET_ERROR = "Error: no se pudo guardar el Presupuesto"
+    const val HINT_TITLE = "Título..."
+}
+
 object ContentDescriptions {
-    const val ADD = "Agregar Presupuesto"
     const val LOADING_INDICATOR = "Cargando..."
-    const val SAVE_BUDGET = "Presupuesto guardado"
-    const val DELETE_BUDGET = "Delete Todo Item"
     const val BACK = "Atrás"
+    const val ADD = "Agregar Presupuesto"
+    const val SAVE_BUDGET = "Guardar Presupuesto"
+    const val DELETE_BUDGET = "Borrar Presupuesto"
 }

@@ -9,11 +9,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.lmar.budgetcalc.feature.presentation.budget_list.BudgetListScreen
 import com.lmar.budgetcalc.feature.presentation.budget_list.BudgetListViewModel
+import com.lmar.budgetcalc.feature.presentation.budget_new_update.BudgetNewUpdateScreen
 import com.lmar.budgetcalc.feature.presentation.util.Screen
 import com.lmar.budgetcalc.ui.theme.BudgetCalcTheme
 import com.lmar.budgetcalc.ui.screens.BudgetCalcNavigationGraph
@@ -46,6 +49,22 @@ class MainActivity : ComponentActivity() {
                             BudgetListScreen(
                                 navController = navController,
                                 viewModel = listViewModel
+                            )
+                        }
+
+                        composable(
+                            route = Screen.BudgetNewUpdateScreen.route + "?budgetId={budgetId}",
+                            arguments = listOf(
+                                navArgument(
+                                    name = "budgetId"
+                                ){
+                                    type = NavType.IntType
+                                    defaultValue = -1
+                                }
+                            )
+                        ){
+                            BudgetNewUpdateScreen(
+                                navController = navController
                             )
                         }
                     }

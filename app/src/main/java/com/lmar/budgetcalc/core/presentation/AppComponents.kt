@@ -14,12 +14,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +32,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.focus.FocusState
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -257,4 +261,57 @@ fun FactComposable(value: String) {
 @Composable
 fun FactComposablePreview() {
     FactComposable("Abceddd allalal")
+}
+
+@Composable
+fun HintTextField(
+    modifier: Modifier = Modifier,
+    text: String,
+    hint: String,
+    fontSize: TextUnit = 32.sp,
+    textColor: Color,
+    isHintVisible: Boolean = true,
+    singleLine: Boolean = false,
+    onValueChange: (String) -> Unit,
+    onFocusChange: (FocusState) -> Unit
+) {
+    Box(
+        modifier = modifier
+    ) {
+        BasicTextField(
+            value = text,
+            onValueChange = onValueChange,
+            singleLine = singleLine,
+            textStyle = TextStyle(
+                fontSize = fontSize,
+                color = textColor
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { onFocusChange(it) }
+        )
+        if(isHintVisible) {
+            Text(
+                text = hint,
+                color = textColor,
+                fontSize = fontSize
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HintTextFieldPreview() {
+    HintTextField(
+        Modifier.padding(10.dp),
+        "",
+        "",
+        32.sp,
+        MaterialTheme.colorScheme.secondary,
+        true,
+        true,
+        {},
+        {}
+    )
 }

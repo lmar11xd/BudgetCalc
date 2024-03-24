@@ -6,17 +6,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -38,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.lmar.budgetcalc.core.util.ContentDescriptions
 import com.lmar.budgetcalc.feature.presentation.budget_list.components.BudgetCard
+import com.lmar.budgetcalc.feature.presentation.budget_new_update.BudgetNewUpdateEvent
 import com.lmar.budgetcalc.feature.presentation.util.Screen
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -75,7 +79,8 @@ fun BudgetListScreen(
                 )
             }
         },
-        topBar = {},
+        topBar = {
+        },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) {
         Box(
@@ -97,9 +102,14 @@ fun BudgetListScreen(
                 ) {
                     items(state.budgets) {budget ->
                         BudgetCard(
+                            modifier = Modifier.fillMaxWidth().padding(4.dp),
                             budget = budget,
                             onDeleteClick = { /*TODO*/ },
-                            onCardClick = { /*TODO*/ }
+                            onCardClick = {
+                                navController.navigate(
+                                    Screen.BudgetNewUpdateScreen.route + "?budgetId=${budget.id}"
+                                )
+                            }
                         )
                     }
                 }
