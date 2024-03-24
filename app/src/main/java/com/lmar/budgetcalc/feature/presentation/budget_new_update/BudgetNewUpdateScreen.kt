@@ -4,13 +4,18 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -19,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
@@ -28,8 +34,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.lmar.budgetcalc.core.presentation.HintTextField
@@ -118,6 +128,10 @@ fun BudgetNewUpdateScreen (
             contentAlignment = Alignment.TopStart,
             modifier = Modifier
                 .fillMaxSize()
+                .padding(
+                    horizontal = horizontalPadding,
+                    vertical = verticalPadding
+                )
                 .background(color = MaterialTheme.colorScheme.background)
         ) {
             Column(
@@ -128,7 +142,7 @@ fun BudgetNewUpdateScreen (
                 HintTextField(
                     text = state.budget.title,
                     hint = BudgetNewUpdateStrings.HINT_TITLE,
-                    textColor = MaterialTheme.colorScheme.secondary,
+                    textColor = MaterialTheme.colorScheme.onSurface,
                     onValueChange = {
                         viewModel.onEvent(BudgetNewUpdateEvent.EnteredTitle(it))
                     },
@@ -138,12 +152,23 @@ fun BudgetNewUpdateScreen (
                     isHintVisible = state.isTitleHintVisible,
                     singleLine = false,
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .padding(
-                            horizontal = horizontalPadding,
-                            vertical = verticalPadding
-                        )
+                        .fillMaxWidth()
+                        .padding(5.dp)
                 )
+
+                Spacer(Modifier.height(30.dp))
+
+                Text(
+                    text = ContentDescriptions.MATERIALS,
+                    fontSize = 24.sp,
+                    style = TextStyle(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp)
+                )
+
             }
         }
     }

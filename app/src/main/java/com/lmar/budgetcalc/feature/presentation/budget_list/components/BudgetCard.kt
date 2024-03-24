@@ -1,5 +1,6 @@
 package com.lmar.budgetcalc.feature.presentation.budget_list.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,7 @@ fun BudgetCard(
         modifier = modifier
             .fillMaxWidth(),
         shape = RoundedCornerShape(15.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary),
         onClick = onCardClick,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f))
     ) {

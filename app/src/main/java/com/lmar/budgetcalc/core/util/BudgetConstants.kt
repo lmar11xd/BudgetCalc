@@ -16,9 +16,11 @@ object BudgetNewUpdateStrings {
 }
 
 object ContentDescriptions {
+    const val APP_NAME = "Cálculo de Presupuestos"
     const val LOADING_INDICATOR = "Cargando..."
     const val BACK = "Atrás"
     const val ADD = "Agregar Presupuesto"
     const val SAVE_BUDGET = "Guardar Presupuesto"
     const val DELETE_BUDGET = "Borrar Presupuesto"
+    const val MATERIALS = "Materiales"
 }

@@ -35,6 +35,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -94,15 +97,26 @@ fun BudgetListScreen(
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
+                Text(
+                    text = ContentDescriptions.APP_NAME,
+                    modifier = Modifier.padding(20.dp),
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 48.sp,
+                    lineHeight = 48.sp
+                )
+
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 12.dp)
-                        .padding(top = 64.dp)
+                        .padding(20.dp)
                 ) {
                     items(state.budgets) {budget ->
                         BudgetCard(
-                            modifier = Modifier.fillMaxWidth().padding(4.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(6.dp),
                             budget = budget,
                             onDeleteClick = { /*TODO*/ },
                             onCardClick = {
