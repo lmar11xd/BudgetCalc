@@ -11,8 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Divider
@@ -45,6 +48,7 @@ import androidx.navigation.NavController
 import com.lmar.budgetcalc.core.presentation.HintTextField
 import com.lmar.budgetcalc.core.util.BudgetNewUpdateStrings
 import com.lmar.budgetcalc.core.util.ContentDescriptions
+import com.lmar.budgetcalc.feature.presentation.budget_new_update.components.MaterialDialog
 import kotlinx.coroutines.flow.collectLatest
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -56,7 +60,6 @@ fun BudgetNewUpdateScreen (
 ) {
     val state = viewModel.state.value
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
 
     val configuration = LocalConfiguration.current
     val isPortrait =
@@ -100,7 +103,7 @@ fun BudgetNewUpdateScreen (
         },
         topBar = {
             TopAppBar(
-                title = {  },
+                title = { },
                 navigationIcon = {
                     IconButton(
                         onClick = {
@@ -111,6 +114,20 @@ fun BudgetNewUpdateScreen (
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = ContentDescriptions.BACK,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            viewModel.onEvent(BudgetNewUpdateEvent.ChangeShowMaterialDialog(true))
+                        },
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AddCircle,
+                            contentDescription = ContentDescriptions.ADD_MATERIAL,
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -140,9 +157,8 @@ fun BudgetNewUpdateScreen (
                     .fillMaxSize()
             ) {
                 HintTextField(
-                    text = state.budget.title,
+                    value = state.budget.title,
                     hint = BudgetNewUpdateStrings.HINT_TITLE,
-                    textColor = MaterialTheme.colorScheme.onSurface,
                     onValueChange = {
                         viewModel.onEvent(BudgetNewUpdateEvent.EnteredTitle(it))
                     },
@@ -169,7 +185,34 @@ fun BudgetNewUpdateScreen (
                         .padding(5.dp)
                 )
 
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(20.dp)
+                ) {
+                    items(state.materials) {material ->
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Text(text = material.description)
+                            Text(text = material.quantity.toString())
+                            Text(text = material.unitPrice.toString())
+                        }
+                    }
+                }
+
             }
         }
     }
+
+    MaterialDialog(
+        show = state.showMaterialDialog,
+        viewModel = viewModel,
+        onClickAgregar = {
+            viewModel.onEvent(BudgetNewUpdateEvent.ChangeShowMaterialDialog(false))
+            viewModel.onEvent(BudgetNewUpdateEvent.AddMaterial)
+        },
+        onClickCancelar = {
+            viewModel.onEvent(BudgetNewUpdateEvent.ChangeShowMaterialDialog(false))
+            viewModel.cleanFieldMaterialDialog()
+        }
+    )
 }

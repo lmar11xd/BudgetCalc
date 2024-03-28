@@ -6,7 +6,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lmar.budgetcalc.core.util.BudgetNewUpdateStrings
+import com.lmar.budgetcalc.core.util.Utils
 import com.lmar.budgetcalc.feature.data.di.IoDispatcher
+import com.lmar.budgetcalc.feature.domain.model.Material
 import com.lmar.budgetcalc.feature.domain.use_cases.BudgetUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -34,6 +36,7 @@ class BudgetNewUpdateViewModel @Inject constructor (
     }
 
     private var currentTodoId: Int? = null
+    private val materials = mutableListOf<Material>()
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -78,6 +81,11 @@ class BudgetNewUpdateViewModel @Inject constructor (
                     isTitleHintVisible = shouldTitleHintBeVisible
                 )
             }
+            is BudgetNewUpdateEvent.ChangeShowMaterialDialog -> {
+                _state.value = _state.value.copy(
+                    showMaterialDialog = event.show
+                )
+            }
             BudgetNewUpdateEvent.Delete -> {
                 viewModelScope.launch(dispatcher + errorHandler) {
                     if(currentTodoId != null) {
@@ -116,6 +124,79 @@ class BudgetNewUpdateViewModel @Inject constructor (
                     }
                 }
             }
+
+            is BudgetNewUpdateEvent.EnteredDescriptionMaterial -> {
+                _state.value = _state.value.copy(
+                    descriptionMaterial = event.value
+                )
+            }
+            is BudgetNewUpdateEvent.EnteredQuantityMaterial -> {
+                _state.value = _state.value.copy(
+                    quantityMaterial = event.value
+                )
+            }
+            is BudgetNewUpdateEvent.EnteredUnitPriceMaterial -> {
+                _state.value = _state.value.copy(
+                    unitPriceMaterial = event.value
+                )
+            }
+
+            BudgetNewUpdateEvent.AddMaterial -> {
+                val description = _state.value.descriptionMaterial;
+                val quantity = _state.value.quantityMaterial;
+                val unitPrice = _state.value.unitPriceMaterial;
+
+                if(isValidFormMaterial()) {
+                    addMaterial(Material(
+                        description = description,
+                        quantity = Utils.toInteger(quantity),
+                        unitPrice = Utils.toDouble(unitPrice),
+                        subTotal = 0.0,
+                        createdAt = System.currentTimeMillis(),
+                        modifiedAt = System.currentTimeMillis(),
+                        actived = true,
+                        budgetId = 0,
+                        id = null
+                    ))
+                    _state.value = _state.value.copy(
+                        materials = materials
+                    )
+                }
+                cleanFieldMaterialDialog()
+            }
         }
+    }
+
+    fun isValidFormMaterial(): Boolean {
+        if (_state.value.descriptionMaterial.isBlank()) {
+            return false
+        }
+
+        val quantityInt = Utils.toInteger(_state.value.quantityMaterial)
+        if (_state.value.quantityMaterial.isBlank() || quantityInt <= 0) {
+            return false
+        }
+
+        val unitPriceDouble = Utils.toDouble(_state.value.unitPriceMaterial)
+        if (_state.value.unitPriceMaterial.isBlank() || unitPriceDouble <= 0) {
+            return false
+        }
+
+        return true
+    }
+
+    private fun addMaterial(material: Material) {
+        materials.add(material)
+    }
+
+    fun getMaterials() = materials
+
+
+    fun cleanFieldMaterialDialog() {
+        _state.value = _state.value.copy(
+            descriptionMaterial = "",
+            quantityMaterial = "",
+            unitPriceMaterial = ""
+        )
     }
 }

@@ -19,8 +19,12 @@ object ContentDescriptions {
     const val APP_NAME = "Cálculo de Presupuestos"
     const val LOADING_INDICATOR = "Cargando..."
     const val BACK = "Atrás"
-    const val ADD = "Agregar Presupuesto"
+    const val ADD = "Agregar"
+    const val CANCEL = "Cancelar"
+    const val ADD_BUGDET = "Agregar Presupuesto"
+    const val ADD_MATERIAL = "Agregar Material"
     const val SAVE_BUDGET = "Guardar Presupuesto"
     const val DELETE_BUDGET = "Borrar Presupuesto"
+    const val MATERIAL = "Material"
     const val MATERIALS = "Materiales"
 }

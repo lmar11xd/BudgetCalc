@@ -1,5 +1,6 @@
 package com.lmar.budgetcalc.core.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -42,6 +43,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -266,10 +268,9 @@ fun FactComposablePreview() {
 @Composable
 fun HintTextField(
     modifier: Modifier = Modifier,
-    text: String,
+    value: String,
     hint: String,
     fontSize: TextUnit = 32.sp,
-    textColor: Color,
     isHintVisible: Boolean = true,
     singleLine: Boolean = false,
     onValueChange: (String) -> Unit,
@@ -279,22 +280,24 @@ fun HintTextField(
         modifier = modifier
     ) {
         BasicTextField(
-            value = text,
+            value = value,
             onValueChange = onValueChange,
             singleLine = singleLine,
             textStyle = TextStyle(
                 fontSize = fontSize,
-                color = textColor
+                color = MaterialTheme.colorScheme.onSurface
             ),
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(10.dp)
                 .onFocusChanged { onFocusChange(it) }
         )
         if(isHintVisible) {
             Text(
                 text = hint,
-                color = textColor,
-                fontSize = fontSize
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = fontSize,
+                modifier = Modifier.padding(10.dp)
             )
         }
     }
@@ -304,13 +307,59 @@ fun HintTextField(
 @Composable
 fun HintTextFieldPreview() {
     HintTextField(
-        Modifier.padding(10.dp),
+        Modifier.fillMaxWidth(),
         "",
-        "",
+        "hint",
         32.sp,
-        MaterialTheme.colorScheme.secondary,
         true,
         true,
+        {},
+        {}
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BorderTextField(
+    modifier: Modifier = Modifier,
+    value: String,
+    title: String,
+    fontSize: TextUnit = 16.sp,
+    singleLine: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    onValueChange: (String) -> Unit,
+    onFocusChange: (FocusState) -> Unit
+) {
+    Box(
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = {
+                Text(text = title)
+            },
+            keyboardOptions = keyboardOptions,
+            singleLine = singleLine,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)
+                .onFocusChanged { onFocusChange(it) }
+        )
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun BorderTextFieldPreview() {
+    BorderTextField(
+        modifier = Modifier.fillMaxWidth(),
+        value = "Algooo",
+        title = "Field Name",
+        fontSize = 16.sp,
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         {},
         {}
     )

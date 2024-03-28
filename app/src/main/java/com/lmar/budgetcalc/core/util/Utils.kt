@@ -33,4 +33,22 @@ object Utils {
         val format = SimpleDateFormat("dd/MM/yyyy")
         return format.format(date)
     }
+
+    fun toInteger(s: String): Int {
+        var value: Int = try {
+            s.toInt()
+        } catch (ex: NumberFormatException) {
+            0
+        }
+        return value
+    }
+
+    fun toDouble(s: String): Double {
+        var value: Double = try {
+            s.toDouble()
+        } catch (ex: NumberFormatException) {
+            0.0
+        }
+        return value
+    }
 }

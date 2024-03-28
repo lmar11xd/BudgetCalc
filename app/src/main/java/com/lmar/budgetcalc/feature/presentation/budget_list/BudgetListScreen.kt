@@ -77,7 +77,7 @@ fun BudgetListScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = ContentDescriptions.ADD,
+                    contentDescription = ContentDescriptions.ADD_BUGDET,
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
