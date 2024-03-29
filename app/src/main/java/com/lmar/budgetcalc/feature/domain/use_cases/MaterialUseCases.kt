@@ -9,11 +9,15 @@ import javax.inject.Inject
 class MaterialUseCases @Inject constructor(
     private val materialRepo: MaterialRepo
 ) {
-    suspend fun addMaterial(material: Material) {
+    suspend fun addAllMaterials(materials: List<Material>) {
+        materialRepo.addAllMaterials(materials)
+    }
+
+    suspend fun addMaterial(material: Material): Long {
         if(material.description.isBlank()) {
             throw InvalidMaterialException(UseCaseStrings.EMPTY_MATERIAL_DESCRIPTION)
         }
-        materialRepo.addMaterial(material)
+        return materialRepo.addMaterial(material)
     }
 
     suspend fun updateMaterial(material: Material) {
@@ -35,6 +39,6 @@ class MaterialUseCases @Inject constructor(
 }
 
 sealed class MaterialUseCaseResult {
-    data class Success(val budgets: List<Material>): MaterialUseCaseResult()
+    data class Success(val materials: List<Material>): MaterialUseCaseResult()
     data class Error(val message: String): MaterialUseCaseResult()
 }

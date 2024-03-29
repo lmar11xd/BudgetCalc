@@ -7,7 +7,8 @@ interface MaterialRepo {
     suspend fun getAllMaterialsFromLocal(budgetId: Int): List<Material>
     suspend fun getAllMaterialsFromRemote()
     suspend fun getMaterialById(id: Int): Material?
-    suspend fun addMaterial(material: Material)
+    suspend fun addAllMaterials(materials: List<Material>)
+    suspend fun addMaterial(material: Material): Long
     suspend fun updateMaterial(material: Material)
     suspend fun deleteMaterial(material: Material)
 }

@@ -5,14 +5,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lmar.budgetcalc.core.util.BudgetListStrings
 import com.lmar.budgetcalc.core.util.BudgetNewUpdateStrings
 import com.lmar.budgetcalc.core.util.Utils
 import com.lmar.budgetcalc.feature.data.di.IoDispatcher
 import com.lmar.budgetcalc.feature.domain.model.Material
+import com.lmar.budgetcalc.feature.domain.use_cases.BudgetUseCaseResult
 import com.lmar.budgetcalc.feature.domain.use_cases.BudgetUseCases
+import com.lmar.budgetcalc.feature.domain.use_cases.MaterialUseCaseResult
+import com.lmar.budgetcalc.feature.domain.use_cases.MaterialUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
@@ -21,11 +26,14 @@ import javax.inject.Inject
 @HiltViewModel
 class BudgetNewUpdateViewModel @Inject constructor (
     private val budgetUseCases: BudgetUseCases,
+    private val materialUseCases: MaterialUseCases,
     savedStateHandle: SavedStateHandle,
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ): ViewModel() {
     private val _state = mutableStateOf(BudgetNewUpdateState())
     val state: State<BudgetNewUpdateState> = _state
+
+    private var getMaterialsJob: Job? = null
 
     private val errorHandler = CoroutineExceptionHandler { _, e ->
         e.printStackTrace()
@@ -36,7 +44,7 @@ class BudgetNewUpdateViewModel @Inject constructor (
     }
 
     private var currentTodoId: Int? = null
-    private val materials = mutableListOf<Material>()
+    private var materialsTemp = mutableListOf<Material>()
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -58,6 +66,7 @@ class BudgetNewUpdateViewModel @Inject constructor (
                             isLoading = false,
                             isTitleHintVisible = budget.title.isBlank(),
                         )
+                        getMaterials(id)
                     }
                 }
             } else {
@@ -101,18 +110,23 @@ class BudgetNewUpdateViewModel @Inject constructor (
                     )
                 )
             }
-            BudgetNewUpdateEvent.SaveTodo -> {
+            BudgetNewUpdateEvent.Save -> {
                 viewModelScope.launch(dispatcher + errorHandler) {
                     try {
                         if(currentTodoId != null) {
                             budgetUseCases.updateBudget(_state.value.budget)
                         } else {
-                            budgetUseCases.addBudget(_state.value.budget.copy(
-                                createdAt = System.currentTimeMillis(),
-                                modifiedAt = System.currentTimeMillis(),
-                                actived = true,
-                                id = null
-                            ))
+                            budgetUseCases.addBudget(
+                                _state.value.budget.copy(
+                                    createdAt = System.currentTimeMillis(),
+                                    modifiedAt = System.currentTimeMillis(),
+                                    actived = true,
+                                    id = null
+                                )
+                            ).also {
+                                materialsTemp.map { material -> material.budgetId = it.toInt() }
+                                materialUseCases.addAllMaterials(materialsTemp)
+                            }
                         }
                         _eventFlow.emit(UiEvent.SaveBudget)
                     } catch (e: Exception) {
@@ -142,27 +156,52 @@ class BudgetNewUpdateViewModel @Inject constructor (
             }
 
             BudgetNewUpdateEvent.AddMaterial -> {
-                val description = _state.value.descriptionMaterial;
-                val quantity = _state.value.quantityMaterial;
-                val unitPrice = _state.value.unitPriceMaterial;
+                val description = _state.value.descriptionMaterial
+                val quantity = _state.value.quantityMaterial
+                val unitPrice = _state.value.unitPriceMaterial
 
                 if(isValidFormMaterial()) {
-                    addMaterial(Material(
-                        description = description,
-                        quantity = Utils.toInteger(quantity),
-                        unitPrice = Utils.toDouble(unitPrice),
-                        subTotal = 0.0,
-                        createdAt = System.currentTimeMillis(),
-                        modifiedAt = System.currentTimeMillis(),
-                        actived = true,
-                        budgetId = 0,
-                        id = null
-                    ))
+                    addMaterialTemp(
+                        Material(
+                            description = description,
+                            quantity = Utils.toInteger(quantity),
+                            unitPrice = Utils.toDouble(unitPrice),
+                            subTotal = 0.0,
+                            createdAt = System.currentTimeMillis(),
+                            modifiedAt = System.currentTimeMillis(),
+                            actived = true,
+                            budgetId = 0,
+                            id = null
+                        )
+                    )
                     _state.value = _state.value.copy(
-                        materials = materials
+                        materials = materialsTemp
                     )
                 }
                 cleanFieldMaterialDialog()
+            }
+        }
+    }
+
+    fun getMaterials(budgetId: Int) {
+        getMaterialsJob?.cancel()
+
+        getMaterialsJob = viewModelScope.launch(dispatcher + errorHandler) {
+            when(val result = materialUseCases.getMaterials(budgetId)) {
+                is MaterialUseCaseResult.Error -> {
+                    _state.value = _state.value.copy(
+                        error = BudgetListStrings.CANT_GET_BUDGETS,
+                        isLoading = false
+                    )
+                }
+
+                is MaterialUseCaseResult.Success -> {
+                    _state.value = _state.value.copy(
+                        materials = result.materials,
+                        isLoading = false
+                    )
+                    result.materials.map { material -> materialsTemp.add(material) }
+                }
             }
         }
     }
@@ -185,12 +224,11 @@ class BudgetNewUpdateViewModel @Inject constructor (
         return true
     }
 
-    private fun addMaterial(material: Material) {
-        materials.add(material)
+    private fun addMaterialTemp(material: Material) {
+        materialsTemp.add(material)
     }
 
-    fun getMaterials() = materials
-
+    fun getMaterialsTemp() = materialsTemp
 
     fun cleanFieldMaterialDialog() {
         _state.value = _state.value.copy(

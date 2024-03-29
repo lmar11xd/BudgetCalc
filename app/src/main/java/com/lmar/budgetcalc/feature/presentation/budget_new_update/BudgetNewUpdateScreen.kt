@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -48,6 +49,7 @@ import androidx.navigation.NavController
 import com.lmar.budgetcalc.core.presentation.HintTextField
 import com.lmar.budgetcalc.core.util.BudgetNewUpdateStrings
 import com.lmar.budgetcalc.core.util.ContentDescriptions
+import com.lmar.budgetcalc.feature.presentation.budget_new_update.components.MaterialCard
 import com.lmar.budgetcalc.feature.presentation.budget_new_update.components.MaterialDialog
 import kotlinx.coroutines.flow.collectLatest
 
@@ -89,7 +91,7 @@ fun BudgetNewUpdateScreen (
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    viewModel.onEvent(BudgetNewUpdateEvent.SaveTodo)
+                    viewModel.onEvent(BudgetNewUpdateEvent.Save)
                 },
                 shape = CircleShape,
                 containerColor = MaterialTheme.colorScheme.primary
@@ -109,7 +111,6 @@ fun BudgetNewUpdateScreen (
                         onClick = {
                             viewModel.onEvent(BudgetNewUpdateEvent.Back)
                         },
-                        modifier = Modifier.padding(start = 8.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
@@ -122,13 +123,13 @@ fun BudgetNewUpdateScreen (
                     IconButton(
                         onClick = {
                             viewModel.onEvent(BudgetNewUpdateEvent.ChangeShowMaterialDialog(true))
-                        },
-                        modifier = Modifier.padding(start = 8.dp)
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Default.AddCircle,
                             contentDescription = ContentDescriptions.ADD_MATERIAL,
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(30.dp)
                         )
                     }
                 },
@@ -186,16 +187,17 @@ fun BudgetNewUpdateScreen (
                 )
 
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(20.dp)
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     items(state.materials) {material ->
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Text(text = material.description)
-                            Text(text = material.quantity.toString())
-                            Text(text = material.unitPrice.toString())
-                        }
+                        MaterialCard(
+                            material = material,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(6.dp),
+                            onDeleteClick = {},
+                            onCardClick = {}
+                        )
                     }
                 }
 

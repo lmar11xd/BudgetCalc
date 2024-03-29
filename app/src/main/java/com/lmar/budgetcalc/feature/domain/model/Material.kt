@@ -8,6 +8,6 @@ data class Material(
     val createdAt: Long,
     val modifiedAt: Long,
     val actived: Boolean,
-    val budgetId: Int,
+    var budgetId: Int,
     val id: Int?
 )

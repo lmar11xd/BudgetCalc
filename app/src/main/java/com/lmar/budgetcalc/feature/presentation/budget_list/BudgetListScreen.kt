@@ -57,10 +57,12 @@ fun BudgetListScreen(
     val state = viewModel.state.value
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-
     val configuration = LocalConfiguration.current
+    val isPortrait =
+        configuration.orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT
+
+    val horizontalPadding = 16.dp
+    val verticalPadding = if(isPortrait) 16.dp else 2.dp
 
     LaunchedEffect(key1 = true) {
         viewModel.getBudgets()
@@ -90,6 +92,10 @@ fun BudgetListScreen(
             contentAlignment = Alignment.TopStart,
             modifier = Modifier
                 .fillMaxSize()
+                .padding(
+                    horizontal = horizontalPadding,
+                    vertical = verticalPadding
+                )
                 .background(
                     color = MaterialTheme.colorScheme.background
                 )
@@ -110,7 +116,6 @@ fun BudgetListScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(20.dp)
                 ) {
                     items(state.budgets) {budget ->
                         BudgetCard(
@@ -118,7 +123,9 @@ fun BudgetListScreen(
                                 .fillMaxWidth()
                                 .padding(6.dp),
                             budget = budget,
-                            onDeleteClick = { /*TODO*/ },
+                            onDeleteClick = {
+                                viewModel.onEvent(BudgetListEvent.Delete(budget))
+                            },
                             onCardClick = {
                                 navController.navigate(
                                     Screen.BudgetNewUpdateScreen.route + "?budgetId=${budget.id}"

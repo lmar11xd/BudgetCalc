@@ -9,11 +9,11 @@ import javax.inject.Inject
 class BudgetUseCases @Inject constructor(
     private val budgetRepo: BudgetRepo
 ) {
-    suspend fun addBudget(budget: Budget) {
+    suspend fun addBudget(budget: Budget): Long {
         if(budget.title.isBlank()) {
             throw InvalidBudgetException(UseCaseStrings.EMPTY_BUDGET_TITLE)
         }
-        budgetRepo.addBudget(budget)
+        return budgetRepo.addBudget(budget)
     }
 
     suspend fun updateBudget(budget: Budget) {

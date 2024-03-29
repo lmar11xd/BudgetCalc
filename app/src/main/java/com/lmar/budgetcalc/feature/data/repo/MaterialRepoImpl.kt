@@ -7,6 +7,7 @@ import com.lmar.budgetcalc.feature.data.mapper.toMaterialListFromLocal
 import com.lmar.budgetcalc.feature.domain.model.Material
 import com.lmar.budgetcalc.feature.domain.repo.MaterialRepo
 import com.lmar.budgetcalc.feature.data.local.MaterialDao
+import com.lmar.budgetcalc.feature.data.mapper.toLocalMaterialList
 import kotlinx.coroutines.CoroutineDispatcher
 
 class MaterialRepoImpl(
@@ -28,8 +29,12 @@ class MaterialRepoImpl(
         return materialDao.getMaterial(id)?.toMaterial()
     }
 
-    override suspend fun addMaterial(material: Material) {
-        materialDao.addMaterial(material.toLocalMaterial())
+    override suspend fun addAllMaterials(materials: List<Material>) {
+        materialDao.addAllMaterials(materials.toLocalMaterialList())
+    }
+
+    override suspend fun addMaterial(material: Material): Long {
+        return materialDao.addMaterial(material.toLocalMaterial())
     }
 
     override suspend fun updateMaterial(material: Material) {
