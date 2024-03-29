@@ -6,8 +6,9 @@ object UseCaseStrings {
     const val EMPTY_MATERIAL_DESCRIPTION = "Material no tiene descripción"
 }
 
-object BudgetListStrings {
+object ListStrings {
     const val CANT_GET_BUDGETS = "Error: no se pudo obtener los presupuestos"
+    const val CANT_GET_MATERIALS = "Error: no se pudo obtener los materiales"
 }
 
 object BudgetNewUpdateStrings {

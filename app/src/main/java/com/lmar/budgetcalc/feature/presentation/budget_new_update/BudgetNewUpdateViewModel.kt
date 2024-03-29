@@ -5,12 +5,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lmar.budgetcalc.core.util.BudgetListStrings
 import com.lmar.budgetcalc.core.util.BudgetNewUpdateStrings
+import com.lmar.budgetcalc.core.util.ListStrings
 import com.lmar.budgetcalc.core.util.Utils
 import com.lmar.budgetcalc.feature.data.di.IoDispatcher
 import com.lmar.budgetcalc.feature.domain.model.Material
-import com.lmar.budgetcalc.feature.domain.use_cases.BudgetUseCaseResult
 import com.lmar.budgetcalc.feature.domain.use_cases.BudgetUseCases
 import com.lmar.budgetcalc.feature.domain.use_cases.MaterialUseCaseResult
 import com.lmar.budgetcalc.feature.domain.use_cases.MaterialUseCases
@@ -43,7 +42,7 @@ class BudgetNewUpdateViewModel @Inject constructor (
         )
     }
 
-    private var currentTodoId: Int? = null
+    private var currentBudgetId: Int? = null
     private var materialsTemp = mutableListOf<Material>()
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
@@ -60,7 +59,7 @@ class BudgetNewUpdateViewModel @Inject constructor (
             if(id != 0) {
                 viewModelScope.launch {
                     budgetUseCases.getBudgetById(id)?.also { budget ->
-                        currentTodoId = id
+                        currentBudgetId = id
                         _state.value = _state.value.copy(
                             budget = budget,
                             isLoading = false,
@@ -97,7 +96,7 @@ class BudgetNewUpdateViewModel @Inject constructor (
             }
             BudgetNewUpdateEvent.Delete -> {
                 viewModelScope.launch(dispatcher + errorHandler) {
-                    if(currentTodoId != null) {
+                    if(currentBudgetId != null) {
                         budgetUseCases.deleteBudget(_state.value.budget)
                     }
                     _eventFlow.emit(UiEvent.Back)
@@ -113,8 +112,19 @@ class BudgetNewUpdateViewModel @Inject constructor (
             BudgetNewUpdateEvent.Save -> {
                 viewModelScope.launch(dispatcher + errorHandler) {
                     try {
-                        if(currentTodoId != null) {
-                            budgetUseCases.updateBudget(_state.value.budget)
+                        if(currentBudgetId != null) {
+                            budgetUseCases.updateBudget(
+                                _state.value.budget
+                            ).also {
+                                materialsTemp.map { material ->
+                                    if(material.id != null && material.id > 0) {
+                                        material.budgetId = currentBudgetId as Int
+                                        materialUseCases.addMaterial(material)
+                                    } else {
+                                        materialUseCases.updateMaterial(material)
+                                    }
+                                }
+                            }
                         } else {
                             budgetUseCases.addBudget(
                                 _state.value.budget.copy(
@@ -156,17 +166,18 @@ class BudgetNewUpdateViewModel @Inject constructor (
             }
 
             BudgetNewUpdateEvent.AddMaterial -> {
-                val description = _state.value.descriptionMaterial
-                val quantity = _state.value.quantityMaterial
-                val unitPrice = _state.value.unitPriceMaterial
-
                 if(isValidFormMaterial()) {
+                    val description = _state.value.descriptionMaterial
+                    val quantity = Utils.toInteger(_state.value.quantityMaterial)
+                    val unitPrice = Utils.toDouble(_state.value.unitPriceMaterial)
+                    val subTotal = quantity * unitPrice
+
                     addMaterialTemp(
                         Material(
                             description = description,
-                            quantity = Utils.toInteger(quantity),
-                            unitPrice = Utils.toDouble(unitPrice),
-                            subTotal = 0.0,
+                            quantity = quantity,
+                            unitPrice = unitPrice,
+                            subTotal = subTotal,
                             createdAt = System.currentTimeMillis(),
                             modifiedAt = System.currentTimeMillis(),
                             actived = true,
@@ -180,17 +191,28 @@ class BudgetNewUpdateViewModel @Inject constructor (
                 }
                 cleanFieldMaterialDialog()
             }
+
+            is BudgetNewUpdateEvent.DeleteMaterial -> {
+                viewModelScope.launch(dispatcher + errorHandler) {
+                    if(event.material?.id != null) {
+                        materialUseCases.deleteMaterial(event.material)
+                    } else {
+                        materialsTemp.remove(event.material)
+                    }
+                    currentBudgetId?.let { getMaterials(it) }
+                }
+            }
         }
     }
 
-    fun getMaterials(budgetId: Int) {
+    private fun getMaterials(budgetId: Int) {
         getMaterialsJob?.cancel()
 
         getMaterialsJob = viewModelScope.launch(dispatcher + errorHandler) {
             when(val result = materialUseCases.getMaterials(budgetId)) {
                 is MaterialUseCaseResult.Error -> {
                     _state.value = _state.value.copy(
-                        error = BudgetListStrings.CANT_GET_BUDGETS,
+                        error = ListStrings.CANT_GET_MATERIALS,
                         isLoading = false
                     )
                 }

@@ -195,7 +195,9 @@ fun BudgetNewUpdateScreen (
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(6.dp),
-                            onDeleteClick = {},
+                            onDeleteClick = {
+                                viewModel.onEvent(BudgetNewUpdateEvent.DeleteMaterial(material))
+                            },
                             onCardClick = {}
                         )
                     }

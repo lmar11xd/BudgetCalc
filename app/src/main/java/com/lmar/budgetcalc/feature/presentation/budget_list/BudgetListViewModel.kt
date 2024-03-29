@@ -4,7 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lmar.budgetcalc.core.util.BudgetListStrings
+import com.lmar.budgetcalc.core.util.ListStrings
 import com.lmar.budgetcalc.feature.data.di.IoDispatcher
 import com.lmar.budgetcalc.feature.domain.model.Budget
 import com.lmar.budgetcalc.feature.domain.use_cases.BudgetUseCaseResult
@@ -61,7 +61,7 @@ class BudgetListViewModel @Inject constructor(
             when(val result = budgetUseCases.getBudgets()) {
                 is BudgetUseCaseResult.Error -> {
                     _state.value = _state.value.copy(
-                        error = BudgetListStrings.CANT_GET_BUDGETS,
+                        error = ListStrings.CANT_GET_BUDGETS,
                         isLoading = false
                     )
                 }
