@@ -55,6 +55,10 @@ class BudgetListViewModel @Inject constructor(
     }
 
     fun getBudgets() {
+        _state.value = _state.value.copy(
+            isLoading = true
+        )
+
         getBudgetsJob?.cancel()
 
         getBudgetsJob = viewModelScope.launch(dispatcher + errorHandler) {

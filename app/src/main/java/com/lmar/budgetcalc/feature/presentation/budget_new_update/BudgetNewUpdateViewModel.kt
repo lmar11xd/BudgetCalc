@@ -112,22 +112,28 @@ class BudgetNewUpdateViewModel @Inject constructor (
             BudgetNewUpdateEvent.Save -> {
                 viewModelScope.launch(dispatcher + errorHandler) {
                     try {
+                        val total = calcBudgetTotal()
+
                         if(currentBudgetId != null) {
                             budgetUseCases.updateBudget(
-                                _state.value.budget
+                                _state.value.budget.copy(
+                                    total = total,
+                                    modifiedAt = System.currentTimeMillis()
+                                )
                             ).also {
                                 materialsTemp.map { material ->
                                     if(material.id != null && material.id > 0) {
+                                        materialUseCases.updateMaterial(material)
+                                    } else {
                                         material.budgetId = currentBudgetId as Int
                                         materialUseCases.addMaterial(material)
-                                    } else {
-                                        materialUseCases.updateMaterial(material)
                                     }
                                 }
                             }
                         } else {
                             budgetUseCases.addBudget(
                                 _state.value.budget.copy(
+                                    total = total,
                                     createdAt = System.currentTimeMillis(),
                                     modifiedAt = System.currentTimeMillis(),
                                     actived = true,
@@ -194,7 +200,7 @@ class BudgetNewUpdateViewModel @Inject constructor (
 
             is BudgetNewUpdateEvent.DeleteMaterial -> {
                 viewModelScope.launch(dispatcher + errorHandler) {
-                    if(event.material?.id != null) {
+                    if(event.material.id != null) {
                         materialUseCases.deleteMaterial(event.material)
                     } else {
                         materialsTemp.remove(event.material)
@@ -222,6 +228,9 @@ class BudgetNewUpdateViewModel @Inject constructor (
                         materials = result.materials,
                         isLoading = false
                     )
+
+                    materialsTemp.clear()
+
                     result.materials.map { material -> materialsTemp.add(material) }
                 }
             }
@@ -250,7 +259,11 @@ class BudgetNewUpdateViewModel @Inject constructor (
         materialsTemp.add(material)
     }
 
-    fun getMaterialsTemp() = materialsTemp
+    private fun calcBudgetTotal(): Double {
+        var total = 0.0
+        materialsTemp.map { material -> total += material.subTotal }
+        return total
+    }
 
     fun cleanFieldMaterialDialog() {
         _state.value = _state.value.copy(
