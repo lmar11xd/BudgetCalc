@@ -10,16 +10,16 @@ class BudgetUseCases @Inject constructor(
     private val budgetRepo: BudgetRepo
 ) {
     suspend fun addBudget(budget: Budget): Long {
-        if(budget.title.isBlank()) {
+        /*if(budget.title.isBlank()) {
             throw InvalidBudgetException(UseCaseStrings.EMPTY_BUDGET_TITLE)
-        }
+        }*/
         return budgetRepo.addBudget(budget)
     }
 
     suspend fun updateBudget(budget: Budget) {
-        if(budget.title.isBlank()) {
+        /*if(budget.title.isBlank()) {
             throw InvalidBudgetException(UseCaseStrings.EMPTY_BUDGET_TITLE)
-        }
+        }*/
         budgetRepo.updateBudget(budget)
     }
 

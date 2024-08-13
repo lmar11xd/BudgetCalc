@@ -8,7 +8,6 @@ sealed class BudgetNewUpdateEvent {
     data class ChangedTitleFocus(val focusState: FocusState): BudgetNewUpdateEvent()
     data class ChangeShowMaterialDialog(val show: Boolean): BudgetNewUpdateEvent()
     object Delete: BudgetNewUpdateEvent()
-    object Save: BudgetNewUpdateEvent()
     object Back: BudgetNewUpdateEvent()
     data class EnteredDescriptionMaterial(val value: String): BudgetNewUpdateEvent()
     data class EnteredQuantityMaterial(val value: String): BudgetNewUpdateEvent()

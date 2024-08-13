@@ -32,8 +32,12 @@ class MaterialUseCases @Inject constructor(
     }
 
     suspend fun getMaterials(budgetId: Int): MaterialUseCaseResult {
-        var materials = materialRepo.getAllMaterials(budgetId)
+        val materials = materialRepo.getAllMaterials(budgetId)
         return MaterialUseCaseResult.Success(materials.sortedBy { it.id })
+    }
+
+    suspend fun getMaterialsByBudget(budgetId: Int): List<Material> {
+        return materialRepo.getAllMaterials(budgetId)
     }
 
 }

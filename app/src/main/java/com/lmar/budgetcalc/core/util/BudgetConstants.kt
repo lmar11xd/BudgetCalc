@@ -28,4 +28,5 @@ object ContentDescriptions {
     const val DELETE_BUDGET = "Borrar Presupuesto"
     const val MATERIAL = "Material"
     const val MATERIALS = "Materiales"
+    const val NOT_TITLE = "(Sin título)"
 }

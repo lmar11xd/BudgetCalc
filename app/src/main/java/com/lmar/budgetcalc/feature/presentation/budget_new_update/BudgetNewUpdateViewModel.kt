@@ -43,7 +43,6 @@ class BudgetNewUpdateViewModel @Inject constructor (
     }
 
     private var currentBudgetId: Int? = null
-    private var materialsTemp = mutableListOf<Material>()
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -88,6 +87,19 @@ class BudgetNewUpdateViewModel @Inject constructor (
                 _state.value = _state.value.copy(
                     isTitleHintVisible = shouldTitleHintBeVisible
                 )
+
+                if(!event.focusState.isFocused) {
+                    viewModelScope.launch(dispatcher + errorHandler) {
+                        currentBudgetId?.let {
+                            budgetUseCases.updateBudget(
+                                _state.value.budget.copy(
+                                    id = currentBudgetId,
+                                    modifiedAt = System.currentTimeMillis()
+                                )
+                            )
+                        }
+                    }
+                }
             }
             is BudgetNewUpdateEvent.ChangeShowMaterialDialog -> {
                 _state.value = _state.value.copy(
@@ -109,51 +121,6 @@ class BudgetNewUpdateViewModel @Inject constructor (
                     )
                 )
             }
-            BudgetNewUpdateEvent.Save -> {
-                viewModelScope.launch(dispatcher + errorHandler) {
-                    try {
-                        val total = calcBudgetTotal()
-
-                        if(currentBudgetId != null) {
-                            budgetUseCases.updateBudget(
-                                _state.value.budget.copy(
-                                    total = total,
-                                    modifiedAt = System.currentTimeMillis()
-                                )
-                            ).also {
-                                materialsTemp.map { material ->
-                                    if(material.id != null && material.id > 0) {
-                                        materialUseCases.updateMaterial(material)
-                                    } else {
-                                        material.budgetId = currentBudgetId as Int
-                                        materialUseCases.addMaterial(material)
-                                    }
-                                }
-                            }
-                        } else {
-                            budgetUseCases.addBudget(
-                                _state.value.budget.copy(
-                                    total = total,
-                                    createdAt = System.currentTimeMillis(),
-                                    modifiedAt = System.currentTimeMillis(),
-                                    actived = true,
-                                    id = null
-                                )
-                            ).also {
-                                materialsTemp.map { material -> material.budgetId = it.toInt() }
-                                materialUseCases.addAllMaterials(materialsTemp)
-                            }
-                        }
-                        _eventFlow.emit(UiEvent.SaveBudget)
-                    } catch (e: Exception) {
-                        _eventFlow.emit(
-                            UiEvent.ShowSnackbar(
-                                message = e.message ?: BudgetNewUpdateStrings.SAVE_BUDGET_ERROR
-                            )
-                        )
-                    }
-                }
-            }
 
             is BudgetNewUpdateEvent.EnteredDescriptionMaterial -> {
                 _state.value = _state.value.copy(
@@ -173,39 +140,52 @@ class BudgetNewUpdateViewModel @Inject constructor (
 
             BudgetNewUpdateEvent.AddMaterial -> {
                 if(isValidFormMaterial()) {
-                    val description = _state.value.descriptionMaterial
-                    val quantity = Utils.toInteger(_state.value.quantityMaterial)
-                    val unitPrice = Utils.toDouble(_state.value.unitPriceMaterial)
-                    val subTotal = quantity * unitPrice
-
-                    addMaterialTemp(
-                        Material(
-                            description = description,
-                            quantity = quantity,
-                            unitPrice = unitPrice,
-                            subTotal = subTotal,
-                            createdAt = System.currentTimeMillis(),
-                            modifiedAt = System.currentTimeMillis(),
-                            actived = true,
-                            budgetId = 0,
-                            id = null
-                        )
-                    )
-                    _state.value = _state.value.copy(
-                        materials = materialsTemp
-                    )
+                    viewModelScope.launch(dispatcher + errorHandler) {
+                        try {
+                            if(currentBudgetId == null) { //Crear
+                                budgetUseCases.addBudget(
+                                    _state.value.budget.copy(
+                                        total = 0.0,
+                                        createdAt = System.currentTimeMillis(),
+                                        modifiedAt = System.currentTimeMillis(),
+                                        actived = true,
+                                        id = null
+                                    )
+                                ).also { id ->
+                                    currentBudgetId = id.toInt()
+                                    guardarMaterial(id.toInt()).also {
+                                        calculateTotal(currentBudgetId!!)
+                                        getMaterials(currentBudgetId!!)
+                                    }
+                                }
+                            } else { //Actualizar
+                                currentBudgetId?.let {
+                                    guardarMaterial(it).also {
+                                        calculateTotal(currentBudgetId!!)
+                                        getMaterials(currentBudgetId!!)
+                                    }
+                                }
+                            }
+                        } catch (e: Exception) {
+                            _eventFlow.emit(
+                                UiEvent.ShowSnackbar(
+                                    message = e.message ?: BudgetNewUpdateStrings.SAVE_BUDGET_ERROR
+                                )
+                            )
+                        }
+                    }
                 }
-                cleanFieldMaterialDialog()
             }
 
             is BudgetNewUpdateEvent.DeleteMaterial -> {
                 viewModelScope.launch(dispatcher + errorHandler) {
                     if(event.material.id != null) {
                         materialUseCases.deleteMaterial(event.material)
-                    } else {
-                        materialsTemp.remove(event.material)
                     }
-                    currentBudgetId?.let { getMaterials(it) }
+                    currentBudgetId?.let {
+                        calculateTotal(it)
+                        getMaterials(it)
+                    }
                 }
             }
         }
@@ -228,10 +208,6 @@ class BudgetNewUpdateViewModel @Inject constructor (
                         materials = result.materials,
                         isLoading = false
                     )
-
-                    materialsTemp.clear()
-
-                    result.materials.map { material -> materialsTemp.add(material) }
                 }
             }
         }
@@ -248,21 +224,47 @@ class BudgetNewUpdateViewModel @Inject constructor (
         }
 
         val unitPriceDouble = Utils.toDouble(_state.value.unitPriceMaterial)
-        if (_state.value.unitPriceMaterial.isBlank() || unitPriceDouble <= 0) {
-            return false
-        }
-
-        return true
-    }
-
-    private fun addMaterialTemp(material: Material) {
-        materialsTemp.add(material)
+        return !(_state.value.unitPriceMaterial.isBlank() || unitPriceDouble <= 0)
     }
 
     private fun calcBudgetTotal(): Double {
         var total = 0.0
-        materialsTemp.map { material -> total += material.subTotal }
+        _state.value.materials.map { material -> total += material.subTotal }
         return total
+    }
+
+    private suspend fun guardarMaterial(budgetId: Int) {
+        val description = _state.value.descriptionMaterial
+        val quantity = Utils.toInteger(_state.value.quantityMaterial)
+        val unitPrice = Utils.toDouble(_state.value.unitPriceMaterial)
+        val subTotal = quantity * unitPrice
+
+        materialUseCases.addMaterial(Material(
+            description = description,
+            quantity = quantity,
+            unitPrice = unitPrice,
+            subTotal = subTotal,
+            createdAt = System.currentTimeMillis(),
+            modifiedAt = System.currentTimeMillis(),
+            actived = true,
+            budgetId = budgetId,
+            id = null
+        ))
+
+        cleanFieldMaterialDialog()
+    }
+
+    private suspend fun calculateTotal(budgetId: Int) {
+        materialUseCases.getMaterialsByBudget(budgetId).also { materials ->
+            val total = materials.sumOf { material -> material.subTotal }
+            budgetUseCases.updateBudget(
+                _state.value.budget.copy(
+                    id = budgetId,
+                    total = total,
+                    modifiedAt = System.currentTimeMillis()
+                )
+            )
+        }
     }
 
     fun cleanFieldMaterialDialog() {

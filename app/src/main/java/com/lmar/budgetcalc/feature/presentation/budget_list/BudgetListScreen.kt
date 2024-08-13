@@ -109,8 +109,8 @@ fun BudgetListScreen(
                     textAlign = TextAlign.Center,
                     style = TextStyle(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = 48.sp,
-                    lineHeight = 48.sp
+                    fontSize = 32.sp,
+                    lineHeight = 32.sp
                 )
 
                 LazyColumn(

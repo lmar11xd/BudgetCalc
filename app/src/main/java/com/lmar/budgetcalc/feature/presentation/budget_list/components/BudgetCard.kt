@@ -23,6 +23,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lmar.budgetcalc.core.presentation.ButtonDelete
+import com.lmar.budgetcalc.core.util.BudgetNewUpdateStrings
+import com.lmar.budgetcalc.core.util.ContentDescriptions
 import com.lmar.budgetcalc.core.util.Utils
 import com.lmar.budgetcalc.feature.domain.model.Budget
 
@@ -58,7 +60,7 @@ fun BudgetCard(
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontSize = 48.sp,
+                    fontSize = 36.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -67,11 +69,11 @@ fun BudgetCard(
                 )
             }
             Text(
-                text = budget.title,
+                text = budget.title.ifEmpty { ContentDescriptions.NOT_TITLE },
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Thin,
                 color = MaterialTheme.colorScheme.onBackground,
-                fontSize = 24.sp,
+                fontSize = 18.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
