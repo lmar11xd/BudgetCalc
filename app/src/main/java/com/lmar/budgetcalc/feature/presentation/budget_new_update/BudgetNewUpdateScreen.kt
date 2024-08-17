@@ -28,6 +28,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -77,6 +78,12 @@ fun BudgetNewUpdateScreen (
                     snackbarHostState.showSnackbar(message = event.message)
                 }
             }
+        }
+    }
+
+    DisposableEffect(key1 = true) {
+        onDispose {
+            viewModel.onEvent(BudgetNewUpdateEvent.Save)
         }
     }
 

@@ -1,5 +1,6 @@
 package com.lmar.budgetcalc.feature.presentation.budget_new_update
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
@@ -55,6 +56,10 @@ class BudgetNewUpdateViewModel @Inject constructor (
 
     init {
         savedStateHandle.get<Int>("budgetId")?.let { id ->
+            _state.value = _state.value.copy(
+                isLoading = true
+            )
+
             if(id != 0) {
                 viewModelScope.launch {
                     budgetUseCases.getBudgetById(id)?.also { budget ->
@@ -87,19 +92,6 @@ class BudgetNewUpdateViewModel @Inject constructor (
                 _state.value = _state.value.copy(
                     isTitleHintVisible = shouldTitleHintBeVisible
                 )
-
-                if(!event.focusState.isFocused) {
-                    viewModelScope.launch(dispatcher + errorHandler) {
-                        currentBudgetId?.let {
-                            budgetUseCases.updateBudget(
-                                _state.value.budget.copy(
-                                    id = currentBudgetId,
-                                    modifiedAt = System.currentTimeMillis()
-                                )
-                            )
-                        }
-                    }
-                }
             }
             is BudgetNewUpdateEvent.ChangeShowMaterialDialog -> {
                 _state.value = _state.value.copy(
@@ -143,15 +135,23 @@ class BudgetNewUpdateViewModel @Inject constructor (
                     viewModelScope.launch(dispatcher + errorHandler) {
                         try {
                             if(currentBudgetId == null) { //Crear
-                                budgetUseCases.addBudget(
-                                    _state.value.budget.copy(
+                                _state.value = _state.value.copy(
+                                    budget = _state.value.budget.copy(
                                         total = 0.0,
                                         createdAt = System.currentTimeMillis(),
                                         modifiedAt = System.currentTimeMillis(),
                                         actived = true,
                                         id = null
-                                    )
+                                    ),
+                                    isLoading = true
+                                )
+
+                                budgetUseCases.addBudget(
+                                    _state.value.budget
                                 ).also { id ->
+                                    _state.value = _state.value.copy(
+                                        isLoading = false
+                                    )
                                     currentBudgetId = id.toInt()
                                     guardarMaterial(id.toInt()).also {
                                         calculateTotal(currentBudgetId!!)
@@ -188,10 +188,27 @@ class BudgetNewUpdateViewModel @Inject constructor (
                     }
                 }
             }
+
+            BudgetNewUpdateEvent.Save -> {
+                viewModelScope.launch(dispatcher + errorHandler) {
+                    if(currentBudgetId != null) {
+                        Log.e("XYZ", "Actualizar Titulo")
+                        budgetUseCases.updateBudget(
+                            _state.value.budget.copy(
+                                modifiedAt = System.currentTimeMillis()
+                            )
+                        )
+                    }
+                }
+            }
         }
     }
 
     private fun getMaterials(budgetId: Int) {
+        _state.value = _state.value.copy(
+            isLoading = true
+        )
+
         getMaterialsJob?.cancel()
 
         getMaterialsJob = viewModelScope.launch(dispatcher + errorHandler) {
@@ -225,12 +242,6 @@ class BudgetNewUpdateViewModel @Inject constructor (
 
         val unitPriceDouble = Utils.toDouble(_state.value.unitPriceMaterial)
         return !(_state.value.unitPriceMaterial.isBlank() || unitPriceDouble <= 0)
-    }
-
-    private fun calcBudgetTotal(): Double {
-        var total = 0.0
-        _state.value.materials.map { material -> total += material.subTotal }
-        return total
     }
 
     private suspend fun guardarMaterial(budgetId: Int) {
